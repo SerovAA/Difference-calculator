@@ -1,26 +1,23 @@
-import json
+from gendiff.parser import parser
 
 
 def generate_diff(file_path1, file_path2):
-    with open(file_path1, 'r', encoding='utf-8') as file1:
-        data1 = json.load(file1)
+    differences = ''
+    first_file, second_file = parser(file_path1, file_path2)
 
-    with open(file_path2, 'r', encoding='utf-8') as file2:
-        data2 = json.load(file2)
+    cross_files_keys = sorted(first_file.keys() & second_file.keys())
+    file1_unique_keys = sorted(first_file.keys() - second_file.keys())
+    file2_unique_keys = sorted(second_file.keys() - first_file.keys())
 
-    keys = sorted(set(data1.keys()) | set(data2.keys()))
-    diff_lines = []
+    for key in cross_files_keys:
+        if first_file[key] == second_file[key]:
+            differences += f"  {key}: {first_file[key]}\n"
+        else:
+            differences += f"- {key}: {first_file[key]}\n"
+            differences += f"+ {key}: {second_file[key]}\n"
+    for key in file1_unique_keys:
+        differences += f"- {key}: {first_file[key]}\n"
+    for key in file2_unique_keys:
+        differences += f"+ {key}: {second_file[key]}\n"
 
-    for key in keys:
-        if key in data1 and key in data2:
-            if data1[key] == data2[key]:
-                diff_lines.append(f"  {key}: {data1[key]}")
-            else:
-                diff_lines.append(f"- {key}: {data1[key]}")
-                diff_lines.append(f"+ {key}: {data2[key]}")
-        elif key in data1:
-            diff_lines.append(f"- {key}: {data1[key]}")
-        elif key in data2:
-            diff_lines.append(f"+ {key}: {data2[key]}")
-
-    return "{{\n{0}\n}}".format("\n".join(diff_lines))
+    return "{\n" + differences.lower() + "}"

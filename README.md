@@ -21,3 +21,7 @@
 Сравнение двух плоских файлов: JSON.
 
 [![asciicast](https://asciinema.org/a/lGp79S1OpoDfJQpeelAdbzBFp.svg)](https://asciinema.org/a/lGp79S1OpoDfJQpeelAdbzBFp)
+
+ПРИМЕР: Сравнение двух плоских файлов формата YAML (YML).
+
+[![asciicast](https://asciinema.org/a/wKUBTy0m0bzwknXYpBP71Q3x9.svg)](https://asciinema.org/a/wKUBTy0m0bzwknXYpBP71Q3x9)
