@@ -4,18 +4,15 @@ import yaml
 
 
 def parser(file_path1, file_path2):
-    file1_ext = os.path.splitext(file_path1)[1]
-    file2_ext = os.path.splitext(file_path2)[1]
+    file1_ext = os.path.splitext(file_path1)
+    file2_ext = os.path.splitext(file_path2)
 
-    if file1_ext == '.json' and file2_ext == '.json':
-        with open(file_path1) as f1, open(file_path2) as f2:
-            first_file = json.load(f1)
-            second_file = json.load(f2)
-    elif file1_ext in ['.yaml', '.yml'] and file2_ext in ['.yaml', '.yml']:
-        with open(file_path1) as f1, open(file_path2) as f2:
-            first_file = yaml.safe_load(f1)
-            second_file = yaml.safe_load(f2)
-    else:
-        raise ValueError("Unsupported file formats")
+    if (file1_ext and file2_ext) == '.json':
+        dict_1 = json.load(open(file_path1))
+        dict_2 = json.load(open(file_path2))
 
-    return first_file, second_file
+    if (file1_ext and file2_ext) == '.yaml' or '.yml':
+        dict_1 = yaml.safe_load(open(file_path1))
+        dict_2 = yaml.safe_load(open(file_path2))
+
+    return dict(dict_1), dict(dict_2)

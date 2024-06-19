@@ -1,23 +1,48 @@
 from gendiff.parser import parser
+from gendiff.stylish import stylish
+from gendiff.constant import ADDED, REMOVED, CHANGED, UNCHANGED, DICT
 
 
-def generate_diff(file_path1, file_path2):
-    differences = ''
-    first_file, second_file = parser(file_path1, file_path2)
+def make_diff(dict_1, dict_2) -> dict:
+    cross_dicts_keys = dict_1.keys() & dict_2.keys()
+    dict1_unique_keys = dict_1.keys() - dict_2.keys()
+    dict2_unique_keys = dict_2.keys() - dict_1.keys()
 
-    cross_files_keys = sorted(first_file.keys() & second_file.keys())
-    file1_unique_keys = sorted(first_file.keys() - second_file.keys())
-    file2_unique_keys = sorted(second_file.keys() - first_file.keys())
+    diff = {}
+    for key in cross_dicts_keys:
+        child_1 = dict_1.get(key)
+        child_2 = dict_2.get(key)
 
-    for key in cross_files_keys:
-        if first_file[key] == second_file[key]:
-            differences += f"  {key}: {first_file[key]}\n"
+        if child_1 == child_2:
+            diff[key] = {
+                "status": UNCHANGED,
+                "diff": {key: child_1},
+            }
+        elif isinstance(child_1, dict) and isinstance(child_2, dict):
+            diff[key] = {
+                "status": DICT,
+                "diff": make_diff(child_1, child_2),
+            }
         else:
-            differences += f"- {key}: {first_file[key]}\n"
-            differences += f"+ {key}: {second_file[key]}\n"
-    for key in file1_unique_keys:
-        differences += f"- {key}: {first_file[key]}\n"
-    for key in file2_unique_keys:
-        differences += f"+ {key}: {second_file[key]}\n"
+            diff[key] = {
+                "status": CHANGED,
+                "diff_rem": {key: child_1},
+                "diff_add": {key: child_2},
+            }
+    for key in dict1_unique_keys:
+        diff[key] = {
+            "status": REMOVED,
+            "diff": {key: dict_1[key]},
+        }
+    for key in dict2_unique_keys:
+        diff[key] = {
+            "status": ADDED,
+            "diff": {key: dict_2[key]},
+        }
+    return dict(sorted(diff.items()))
 
-    return "{\n" + differences.lower() + "}"
+
+def generate_diff(file_path1, file_path2, format=stylish):
+    dict_1, dict_2 = parser(file_path1, file_path2)
+    diff = make_diff(dict_1, dict_2)
+    return format(diff)
