@@ -1,6 +1,11 @@
 from gendiff.parser import parser
-from gendiff.stylish import stylish
+from gendiff.formatters import format_stylish, format_plain
 from gendiff.constant import ADDED, REMOVED, CHANGED, UNCHANGED, DICT
+
+CHOOSE_FORMAT = {
+    "stylish": format_stylish,
+    "plain": format_plain,
+}
 
 
 def make_diff(dict_1, dict_2) -> dict:
@@ -42,7 +47,7 @@ def make_diff(dict_1, dict_2) -> dict:
     return dict(sorted(diff.items()))
 
 
-def generate_diff(file_path1, file_path2, format=stylish):
+def generate_diff(file_path1, file_path2, format_name="stylish"):
     dict_1, dict_2 = parser(file_path1, file_path2)
     diff = make_diff(dict_1, dict_2)
-    return format(diff)
+    return CHOOSE_FORMAT[format_name](diff)
