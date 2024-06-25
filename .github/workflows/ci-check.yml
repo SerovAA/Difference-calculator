@@ -21,6 +21,7 @@ jobs:
           make test
       - name: Test & publish code coverage
         uses: SerovAA/python-project-50@v5.0.0
+        if: github.ref_name == 'mailn'
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         with:
