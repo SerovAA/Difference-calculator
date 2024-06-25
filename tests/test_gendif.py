@@ -1,3 +1,4 @@
+import os
 import pytest
 from gendiff import generate_diff
 
@@ -30,10 +31,6 @@ def read_file_content(filepath):
         return file.read()
 
 
-def remove_whitespace(s):
-    return ''.join(s.split())
-
-
 def test_generate_diff(paths, format_name):
     result_diff_json = generate_diff(paths["json1"], paths["json2"], format_name["stylish"])
     result_diff_yml = generate_diff(paths["yml1"], paths["yml2"], format_name["stylish"])
@@ -43,10 +40,10 @@ def test_generate_diff(paths, format_name):
     result_diff_yml_tree_stat = generate_diff(paths["tree_yml1"], paths["tree_yml2"], format_name["plain"])
     result_diff_json_view = generate_diff(paths["tree_json1"], paths["tree_json2"], format_name["json"])
 
-    assert remove_whitespace(result_diff_json) == remove_whitespace(read_file_content('tests/fixtures/stylish_plain'))
-    assert remove_whitespace(result_diff_yml) == remove_whitespace(read_file_content('tests/fixtures/stylish_plain'))
-    assert remove_whitespace(result_diff_json_tree) == remove_whitespace(read_file_content('tests/fixtures/stylish'))
-    assert remove_whitespace(result_diff_yml_tree) == remove_whitespace(read_file_content('tests/fixtures/stylish'))
-    assert remove_whitespace(result_diff_json_tree_stat) == remove_whitespace(read_file_content('tests/fixtures/plain'))
-    assert remove_whitespace(result_diff_yml_tree_stat) == remove_whitespace(read_file_content('tests/fixtures/plain'))
-    assert remove_whitespace(result_diff_json_view) == remove_whitespace(read_file_content('tests/fixtures/json'))
+    assert result_diff_json == read_file_content('tests/fixtures/stylish_plain')
+    assert result_diff_yml == read_file_content('tests/fixtures/stylish_plain')
+    assert result_diff_json_tree == read_file_content('tests/fixtures/stylish')
+    assert result_diff_yml_tree == read_file_content('tests/fixtures/stylish')
+    assert result_diff_json_tree_stat == read_file_content('tests/fixtures/plain')
+    assert result_diff_yml_tree_stat == read_file_content('tests/fixtures/plain')
+    assert result_diff_json_view == read_file_content('tests/fixtures/json')
