@@ -14,7 +14,7 @@ def to_string(value, depth: int) -> str:
         current_indent = indent + (" " * 6)
         lines = []
         for k, v in value.items():
-            lines.append(f"{current_indent}{k}:{to_string(v, depth + 1)}")
+            lines.append(f"{current_indent}{k}: {to_string(v, depth + 1)}")
         result = "\n".join(lines)
         return f'{{\n{result}\n  {indent}}}'
 
@@ -39,7 +39,7 @@ def iter_(node: dict, depth=0) -> str:
         return f"{indent}  {node['key']}: {{\n{result}\n  {indent}}}"
 
     if node['type'] == 'changed':
-        line1 = f"{indent}- {node['key']}: {formatted_value1.rstrip()}\n"
+        line1 = f"{indent}- {node['key']}: {formatted_value1}\n"
         line2 = f"{indent}+ {node['key']}: {formatted_value2}"
         result = line1 + line2
         return result
