@@ -1,55 +1,61 @@
-from gendiff.constant import ADDED, REMOVED, CHANGED, DICT, UNCHANGED
+"""Stylish module - apply stylish view to diff (by default)"""
 
 
-def edit_value(value):
+def get_indent(depth: int) -> str:
+    return " " * (depth * 4 - 2)
+
+
+def to_string(value, depth: int) -> str:
     if isinstance(value, bool):
-        return str(value).lower()
-    elif value is None:
-        return "null"
+        return 'true' if value else 'false'
+
+    if value is None:
+        return 'null'
+
+    if isinstance(value, dict):
+        indent = get_indent(depth)
+        current_indent = indent + (" " * 6)
+        lines = []
+        for k, v in value.items():
+            lines.append(f"{current_indent}{k}: {to_string(v, depth + 1)}")
+        result = "\n".join(lines)
+        return f'{{\n{result}\n  {indent}}}'
+
     return value
 
 
-def to_string(tree, depth=1):
-    curr_prefix = UNCHANGED * depth
-    prev_prefix = curr_prefix[:-4]
-    result = []
+def iter_(node: dict, depth=0) -> str:
+    children = node.get('children')
+    indent = get_indent(depth)
+    formatted_value = to_string(node.get('value'), depth)
+    formatted_value1 = to_string(node.get('old_value'), depth)
+    formatted_value2 = to_string(node.get('new_value'), depth)
 
-    def to_str_dict(dictionary, deep=1):
-        res = []
-        for k, v in dictionary.items():
-            if not isinstance(v, dict):
-                v = edit_value(v)
-                res.append(UNCHANGED * deep + curr_prefix + f"{k}: {v}")
-            else:
-                res.append(UNCHANGED * deep + curr_prefix + f"{k}: " + "{")
-                res.append(prev_prefix + to_str_dict(v, deep + 1))
-                res.append(UNCHANGED * deep + curr_prefix + "}")
-        return "\n".join(res)
+    if node['type'] == 'root':
+        lines = map(lambda child: iter_(child, depth + 1), children)
+        result = '\n'.join(lines)
+        return f'{{\n{result}\n}}'
 
-    def to_str_tree_dict(dictionary, status):
-        for k, v in dictionary.items():
-            if not any(isinstance(val, dict) for val in dictionary.values()):
-                v = edit_value(v)
-                result.append(prev_prefix + status + f"{k}: {v}")
-            else:
-                result.append(prev_prefix + status + f"{k}: " + "{")
-                result.append(to_str_dict(v))
-                result.append(curr_prefix + "}")
+    if node['type'] == 'nested':
+        lines = map(lambda child: iter_(child, depth + 1), children)
+        result = '\n'.join(lines)
+        return f"{indent}  {node['key']}: {{\n{result}\n  {indent}}}"
 
-    for key, value in tree.items():
-        if value["status"] == DICT:
-            result.append(curr_prefix + f"{key}: " + "{")
-            result.append(to_string(value["diff"], depth + 1))
+    if node['type'] == 'changed':
+        line1 = f"{indent}- {node['key']}: {formatted_value1}\n"
+        line2 = f"{indent}+ {node['key']}: {formatted_value2}"
+        result = line1 + line2
+        return result
 
-        elif value["status"] == CHANGED:
-            to_str_tree_dict(value["diff_rem"], status=REMOVED)
-            to_str_tree_dict(value["diff_add"], status=ADDED)
-        else:
-            to_str_tree_dict(value["diff"], status=value["status"])
+    if node['type'] == 'unchanged':
+        return f"{indent}  {node['key']}: {formatted_value}"
 
-    result = "\n".join(result) + f"\n{prev_prefix}" + "}"
-    return result
+    if node['type'] == 'removed':
+        return f"{indent}- {node['key']}: {formatted_value}"
+
+    if node['type'] == 'added':
+        return f"{indent}+ {node['key']}: {formatted_value}"
 
 
-def format_stylish(diff: dict):
-    return "{\n" + to_string(diff)
+def format_(node: dict):
+    return iter_(node)

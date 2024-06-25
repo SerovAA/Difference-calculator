@@ -1,62 +1,46 @@
-from gendiff.constant import ADDED, REMOVED, CHANGED, DICT, COMPLEX
+"""Plain module - apply plain view to diff"""
 
 
-def make_phrase(phrase_type, path="", value1="", value2=""):
-    phrases = {
-        "removed": f"Property {path} was removed",
-        "added": f"Property {path} was added with value: {value2}",
-        "updated": f"Property {path} was updated. From {value1} to {value2}",
-    }
-    return phrases[phrase_type]
-
-
-def is_tree(dictionary):
-    if isinstance(dictionary, dict):
-        return any(isinstance(value, dict) for value in dictionary.values())
-    return dictionary
-
-
-def edit_value(value):
+def to_string(value):
+    if isinstance(value, dict):
+        return '[complex value]'
     if isinstance(value, bool):
-        return str(value).lower()
-    elif value is None:
+        return "true" if value else "false"
+    if isinstance(value, int):
+        return value
+    if value is None:
         return "null"
     return f"'{value}'"
 
 
-def make_value(value, key):
-    if is_tree(value):
-        return COMPLEX
-    return edit_value(value[key])
+def iter_(node: dict, path="") -> str:
+    children = node.get('children')
+    current_path = f"{path}{node.get('key')}"
+
+    if node['type'] == 'root':
+        lines = map(lambda child: iter_(child, path), children)
+        result = "\n".join(filter(bool, lines))
+        return result
+
+    if node['type'] == 'nested':
+        lines = map(lambda child: iter_(child, f"{current_path}."), children)
+        result = "\n".join(filter(bool, lines))
+        return result
+
+    if node['type'] == 'removed':
+        return f"Property '{current_path}' was removed"
+
+    if node['type'] == 'added':
+        formatted_value = to_string(node.get('value'))
+        return f"Property '{current_path}' was added " \
+               f"with value: {formatted_value}"
+
+    if node['type'] == 'changed':
+        formatted_old_value = to_string(node.get('old_value'))
+        formatted_new_value = to_string(node.get('new_value'))
+        return f"Property '{current_path}' was updated. " \
+               f"From {formatted_old_value} to {formatted_new_value}"
 
 
-def format_plain(diff: dict, node=""):
-    result = []
-    for key, value in diff.items():
-        status = value["status"]
-
-        if node:
-            path = node + f".{key}"
-        else:
-            path = f"{key}"
-
-        if status == DICT:
-            result.append(format_plain(value["diff"], path))
-        elif status == ADDED:
-            value2 = make_value(value["diff"], key)
-            phrase = make_phrase("added", edit_value(path),
-                                 value2=value2)
-            result.append(phrase)
-        elif status == REMOVED:
-            value2 = make_value(value["diff"], key)
-            phrase = make_phrase("removed", edit_value(path),
-                                 value2=value2)
-            result.append(phrase)
-        elif status == CHANGED:
-            value1 = make_value(value["diff_rem"], key)
-            value2 = make_value(value["diff_add"], key)
-            phrase = make_phrase("updated", edit_value(path),
-                                 value1=value1, value2=value2)
-            result.append(phrase)
-
-    return "\n".join(result)
+def format_(node: dict):
+    return iter_(node)
