@@ -1,6 +1,6 @@
 import pytest
 from gendiff import generate_diff
-import json
+
 
 @pytest.fixture
 def paths():
@@ -69,10 +69,8 @@ def test_generate_diff(paths, format_name):
 
     assert result_diff_json == read_file_content('tests/fixtures/stylish_plain')
     assert result_diff_yml == read_file_content('tests/fixtures/stylish_plain')
-
-    #assert result_diff_json_tree == read_file_content('tests/fixtures/stylish')
-    #assert result_diff_yml_tree == read_file_content('tests/fixtures/stylish')
-
+    assert result_diff_json_tree == read_file_content('tests/fixtures/stylish')
+    assert result_diff_yml_tree == read_file_content('tests/fixtures/stylish')
     assert result_diff_json_tree_stat == read_file_content('tests/fixtures/plain')
     assert result_diff_yml_tree_stat == read_file_content('tests/fixtures/plain')
     assert result_diff_json_view == read_file_content('tests//fixtures/json')
