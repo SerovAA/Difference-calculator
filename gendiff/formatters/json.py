@@ -1,6 +1,3 @@
-"""JSON module - apply JSON view to diff"""
-
-
 import json
 
 

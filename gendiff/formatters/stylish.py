@@ -1,6 +1,3 @@
-"""Stylish module - apply stylish view to diff (by default)"""
-
-
 def get_indent(depth: int) -> str:
     return " " * (depth * 4 - 2)
 

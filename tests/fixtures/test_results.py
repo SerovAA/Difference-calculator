@@ -20,7 +20,7 @@ RESULT_TREE = """{
         }
         setting6: {
             doge: {
-              - wow: 
+              - wow:
               + wow: so much
             }
             key: value
@@ -64,7 +64,7 @@ Property 'group1.nest' was updated. From [complex value] to 'str'
 Property 'group2' was removed
 Property 'group3' was added with value: [complex value]"""
 
-RESULT_JSON ="""{
+RESULT_JSON = """{
     "type": "root",
     "children": [
         {
