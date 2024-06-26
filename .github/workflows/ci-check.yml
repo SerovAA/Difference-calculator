@@ -21,7 +21,6 @@ jobs:
           make test
       - name: Test & publish code coverage
         uses: paambaati/codeclimate-action@v3.0.0
-        if: github.ref_name == 'mailn'
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         with:
