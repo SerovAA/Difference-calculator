@@ -18,33 +18,26 @@ def paths():
     }
 
 
-@pytest.fixture
-def format_name():
-    return {
-        "stylish": "stylish",
-        "plain": "plain",
-        "json": "json",
-    }
-
-
 def read_file_content(filepath):
     with open(filepath, 'r') as file:
         return file.read()
 
 
-def test_generate_diff(paths, format_name):
-    result_diff_json = generate_diff(paths["json1"], paths["json2"], format_name["stylish"])
-    result_diff_yml = generate_diff(paths["yml1"], paths["yml2"], format_name["stylish"])
-    result_diff_json_tree = generate_diff(paths["tree_json1"], paths["tree_json2"], format_name["stylish"])
-    result_diff_yml_tree = generate_diff(paths["tree_yml1"], paths["tree_yml2"], format_name["stylish"])
-    result_diff_json_tree_stat = generate_diff(paths["tree_json1"], paths["tree_json2"], format_name["plain"])
-    result_diff_yml_tree_stat = generate_diff(paths["tree_yml1"], paths["tree_yml2"], format_name["plain"])
-    result_diff_json_view = generate_diff(paths["tree_json1"], paths["tree_json2"], format_name["json"])
+@pytest.mark.parametrize("file1_key, file2_key, format_name, expected_file", [
+    ("json1", "json2", "stylish", "stylish_plain"),
+    ("yml1", "yml2", "stylish", "stylish_plain"),
+    ("tree_json1", "tree_json2", "stylish", "stylish"),
+    ("tree_yml1", "tree_yml2", "stylish", "stylish"),
+    ("tree_json1", "tree_json2", "plain", "plain"),
+    ("tree_yml1", "tree_yml2", "plain", "plain"),
+    ("tree_json1", "tree_json2", "json", "json")
+])
+def test_generate_diff(file1_key, file2_key, format_name, expected_file, paths):
+    file1_path = paths[file1_key]
+    file2_path = paths[file2_key]
+    expected_file_path = os.path.join('tests/fixtures', expected_file)
 
-    assert result_diff_json == read_file_content(os.path.join('tests/fixtures', 'stylish_plain'))
-    assert result_diff_yml == read_file_content(os.path.join('tests/fixtures', 'stylish_plain'))
-    assert result_diff_json_tree == read_file_content(os.path.join('tests/fixtures', 'stylish'))
-    assert result_diff_yml_tree == read_file_content(os.path.join('tests/fixtures', 'stylish'))
-    assert result_diff_json_tree_stat == read_file_content(os.path.join('tests/fixtures', 'plain'))
-    assert result_diff_yml_tree_stat == read_file_content(os.path.join('tests/fixtures', 'plain'))
-    assert result_diff_json_view == read_file_content(os.path.join('tests/fixtures', 'json'))
+    result = generate_diff(file1_path, file2_path, format_name)
+    expected_output = read_file_content(expected_file_path)
+
+    assert result == expected_output
