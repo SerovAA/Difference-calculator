@@ -16,10 +16,14 @@ jobs:
       - name: Run linter
         run: |
           make lint
+
       - name: Test & publish code coverage
-        uses: paambaati/codeclimate-action@v3.0.0
-        env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        run: |
+          coverage run -m pytest tests/
+          coverage lcov -o reports/lcov.info
+          mkdir -p reports
+      - name: Upload to QLTY.sh
+        uses: qltysh/qlty-action/coverage@v1
         with:
-          coverageCommand: make test-coverage
-          debug: true
+          token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
+          files: reports/lcov.info
