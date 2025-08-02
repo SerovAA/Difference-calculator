@@ -16,14 +16,12 @@ jobs:
       - name: Run linter
         run: |
           make lint
-
       - name: run test con
         run: |
           mkdir -p reports
           coverage run -m pytest
           coverage lcov -o reports/lcov.info
-
       - uses: qltysh/qlty-action/coverage@v1
         with:
-          token: {{secrets.QLTY_COVERAGE_TOKEN}}
+          token: ${{secrets.QLTY_COVERAGE_TOKEN}}
           files: reports/lcov.info
