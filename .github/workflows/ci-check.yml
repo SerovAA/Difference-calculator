@@ -19,11 +19,15 @@ jobs:
 
       - name: Test & publish code coverage
         run: |
-          coverage run -m pytest tests/
-          coverage lcov -o reports/lcov.info
-          mkdir -p reports
+          python -m coverage run -m pytest tests/
+          python -m coverage lcov -o coverage.lcov
+          mv coverage.xml coverage.lcov reports/
       - name: Upload to QLTY.sh
         uses: qltysh/qlty-action/coverage@v1
         with:
           token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
           files: reports/lcov.info
+
+      - name: Verify files
+        run: |
+          ls -la reports/
