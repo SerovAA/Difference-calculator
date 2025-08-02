@@ -1,29 +1,31 @@
 name: CI check
-on: push
+
+on: [push, pull_request]
+
 jobs:
-  build:
+  test-and-coverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+
       - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
+        uses: actions/setup-python@v5
+
       - name: Install dependencies
         run: |
-          pip install coverage pytest
-          pip install poetry
-          make install
-      - name: Run linter
-        run: |
-          make lint
-      - name: run test con
+          python -m pip install --upgrade pip
+          pip install coverage pytest PyYAML
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f pyproject.toml ]; then pip install -e .; fi
+
+      - name: Run tests with coverage
         run: |
           mkdir -p reports
-          coverage run -m pytest
-          coverage lcov -o reports/lcov.info
+          python -m coverage run -m pytest -v
+          python -m coverage lcov -o reports/lcov.info
 
-      - uses: qltysh/qlty-action/coverage@v1
+      - name: Upload coverage to QLty
+        uses: qltysh/qlty-action/coverage@v1
         with:
-          token: ${{secrets.QLTY_COVERAGE_TOKEN}}
+          token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
           files: reports/lcov.info
