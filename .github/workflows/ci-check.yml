@@ -17,6 +17,12 @@ jobs:
         run: |
           make lint
 
+      - name: run test con
+        run: |
+          mkdir -p reports
+          coverage run -m pytest
+          coverage lcov -o reports/lcov.info
+
       - uses: qltysh/qlty-action/coverage@v1
         with:
           token: {{secrets.QLTY_COVERAGE_TOKEN}}
