@@ -11,6 +11,7 @@ jobs:
           python-version: '3.x'
       - name: Install dependencies
         run: |
+          pip install coverage pytest
           pip install poetry
           make install
       - name: Run linter
@@ -21,6 +22,7 @@ jobs:
           mkdir -p reports
           coverage run -m pytest
           coverage lcov -o reports/lcov.info
+
       - uses: qltysh/qlty-action/coverage@v1
         with:
           token: ${{secrets.QLTY_COVERAGE_TOKEN}}
